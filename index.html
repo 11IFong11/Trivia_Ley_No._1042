@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia Ley No. 1042</title>
+    <style>
+        :root {
+            --sky-blue-safe: #1e5d8a;
+            --primary-blue: #003366;
+            --primary-dark: #00001a;
+            --accent-gold: #FFD700;
+            --success: #28a745;
+            --error: #dc3545;
+            --white: #ffffff;
+            --transition: all 0.4s ease;
+        }
+
+        html { scroll-behavior: smooth; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background: linear-gradient(180deg, var(--sky-blue-safe) 0%, var(--primary-blue) 45%, var(--primary-dark) 100%);
+            min-height: 100vh;
+            color: var(--white);
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        #main-wrapper {
+            width: 90%; max-width: 800px;
+            margin: 60px 0; transition: var(--transition);
+            text-align: center;
+        }
+
+        #main-wrapper.mobile-format { max-width: 380px; }
+
+        header h1 { font-size: 2.5rem; margin-bottom: 40px; letter-spacing: 2px; }
+
+        /* Contenedores de Pantallas */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* Tarjeta de Trivia */
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(15px);
+            padding: 40px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+
+        .question-text { font-size: 1.4rem; font-weight: 300; margin-bottom: 30px; line-height: 1.6; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: rgb(255, 255, 255); padding: 20px; border-radius: 4px;
+            font-size: 1.1rem; cursor: pointer; transition: var(--transition);
+        }
+
+        .option-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.2); }
+
+        /* Estados de respuesta */
+        .option-btn.correct { background: var(--success) !important; border-color: var(--success); }
+        .option-btn.incorrect { background: var(--error) !important; border-color: var(--error); }
+
+        /* Botones de Control */
+        .btn-main {
+            background: var(--white); color: var(--primary-blue);
+            border: none; padding: 15px 40px; border-radius: 4px;
+            font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
+            cursor: pointer; transition: 0.3s; margin-top: 20px;
+        }
+
+        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+
+        /* Footer */
+        footer {
+            width: 100%; background: var(--white); color: #1a1a1a;
+            padding: 60px 20px; margin-top: auto; display: flex; justify-content: center;
+        }
+
+        .footer-content { width: 100%; max-width: 1100px; display: flex; justify-content: space-between; }
+        .member-list { text-align: right; border-left: 1px solid #ddd; padding-left: 40px; }
+
+        .format-toggle {
+            position: fixed; bottom: 20px; right: 20px;
+            background: var(--white); color: var(--primary-blue);
+            border: none; padding: 10px 20px; border-radius: 4px;
+            font-weight: bold; cursor: pointer; z-index: 1000;
+        }
+
+        .score-text { font-size: 3rem; font-weight: 800; margin: 20px 0; color: var(--accent-gold); }
+    </style>
+</head>
+<body>
+
+    <button class="format-toggle" onclick="changeFormat()">Formato</button>
+
+    <div id="main-wrapper">
+        <header>
+            <h1>Trivia de la Ley No. 1042</h1>
+        </header>
+
+        <!-- Pantalla de Inicio -->
+        <div id="start-screen" class="screen active">
+            <div class="quiz-card">
+                <p style="font-size: 1.2rem; margin-bottom: 20px;">Pon a prueba tus conocimientos sobre los artículos más importantes de la Ley Especial de Ciberdelitos.</p>
+                <button class="btn-main" onclick="startQuiz()">Iniciar Trivia</button>
+            </div>
+        </div>
+
+        <!-- Pantalla de Preguntas -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-card">
+                <p id="progress" style="margin-bottom: 10px; opacity: 0.6; font-size: 0.8rem;"></p>
+                <div id="question" class="question-text"></div>
+                <div class="options-grid" id="options"></div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Resultados -->
+        <div id="result-screen" class="screen">
+            <div class="quiz-card">
+                <h2>Resultado Final</h2>
+                <div id="final-score-val" class="score-text"></div>
+                <p id="score-msg" style="font-size: 1.5rem; margin-bottom: 30px;"></p>
+                <button class="btn-main" onclick="restartQuiz()">Reiniciar Trivia</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div>
+                <h2 style="color: var(--primary-blue)">UNI</h2>
+                <p style="font-weight: bold;">DACAC</p>
+                <p style="font-size: 0.8rem; color: #666; max-width: 300px;">Dirección de Área de Conocimiento de Arquitectura y Construcción</p>
+            </div>
+            <div class="member-list">
+                   <h2 style="color: var(--primary-blue)">Integrantes</h2>
+                <p>Débora Vega</p>
+                <p>Iván Fóng</p>
+                <p>Jonathan López</p>
+                <p>Wendy Moreno</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const questions = [
+            { q: "Un extraño intenta adivinar tu contraseña para entrar a tu cuenta de Facebook sin que te des cuenta.", a: "4" },
+            { q: "Alguien logra abrir tu carpeta de Drive privada para ver tus documentos de la universidad.", a: "5" },
+            { q: "Un hacker bloquea el acceso a la base de datos de una alcaldía para que no puedan trabajar.", a: "8" },
+            { q: "Recibís un mensaje falso de un banco pidiéndote dinero para 'desbloquear' tu tarjeta.", a: "12" },
+            { q: "Una persona roba secretos industriales de una constructora local usando un malware.", a: "13" },
+            { q: "Se comparte un audio por WhatsApp diciendo que hay un toque de queda falso, causando pánico.", a: "28" },
+            { q: "Alguien crea un perfil con tu nombre y fotos para pedir dinero a tus familiares.", a: "30" },
+            { q: "Un funcionario público filtra fotos de documentos privados que obtuvo del sistema informático.", a: "32" }
+        ];
+
+        let currentIdx = 0;
+        let score = 0;
+        let pool = [];
+
+        function startQuiz() {
+            score = 0;
+            currentIdx = 0;
+            pool = [...questions].sort(() => Math.random() - 0.5);
+            showScreen('quiz-screen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const data = pool[currentIdx];
+            document.getElementById('progress').innerText = `PREGUNTA ${currentIdx + 1} DE 8`;
+            document.getElementById('question').innerText = data.q;
+            
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+
+            // Los 8 artículos importantes
+            const allOptions = ["4", "5", "8", "12", "13", "28", "30", "32"];
+            
+            allOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = `Art. ${opt}`;
+                btn.onclick = () => handleAnswer(btn, opt, data.a);
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedBtn, selectedOpt, correctOpt) {
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(b => b.disabled = true);
+
+            if(selectedOpt === correctOpt) {
+                selectedBtn.classList.add('correct');
+                score++;
+            } else {
+                selectedBtn.classList.add('incorrect');
+                // Mostrar la correcta en verde
+                btns.forEach(b => {
+                    if(b.innerText === `Art. ${correctOpt}`) b.classList.add('correct');
+                });
+            }
+
+            setTimeout(() => {
+                currentIdx++;
+                if(currentIdx < pool.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1500);
+        }
+
+        function showResults() {
+            showScreen('result-screen');
+            document.getElementById('final-score-val').innerText = `${score}/8`;
+            
+            const msgs = {
+                0: "Ve a estudiar. Urgente.",
+                1: "Ve a estudiar.",
+                2: "Podría ser peor. Creo.",
+                3: "Podría ser peor.",
+                4: "Nada Mal.",
+                5: "Está Bien.",
+                6: "Está muy Bien.",
+                7: "Casi Perfecto.",
+                8: "Perfecto!"
+            };
+            document.getElementById('score-msg').innerText = msgs[score];
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function restartQuiz() {
+            showScreen('start-screen');
+        }
+
+        function changeFormat() {
+            document.getElementById('main-wrapper').classList.toggle('mobile-format');
+        }
+    </script>
+</body>
+</html>
